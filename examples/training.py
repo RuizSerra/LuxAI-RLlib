@@ -1,21 +1,14 @@
+"""
 
-# Lux AI interface to RLlib `MultiAgentsEnv`
+Author: Jaime Ruiz Serra (@RuizSerra)
+Date:   September 2021
+"""
 
-For [Lux AI Season 1](https://www.kaggle.com/c/lux-ai-2021) Kaggle competition.
-
-* [LuxAI](https://github.com/Lux-AI-Challenge/Lux-Design-2021)
-* [RLlib-multiagents](https://docs.ray.io/en/stable/rllib-package-ref.html#ray.rllib.env.MultiAgentEnv)  
-* [Kaggle environments](https://github.com/Kaggle/kaggle-environments#training)  
-
-## TLDR
-
-See [`examples/training.py`](examples/training.py)
-
-```python
 import numpy as np
 
 # (1) Define your custom interface for (obs, reward, done, info, actions) ---
 from lux_interface import LuxDefaultInterface
+
 
 class MyInterface(LuxDefaultInterface):
     def observation(self, joint_obs, actors) -> dict:
@@ -32,23 +25,24 @@ class MyInterface(LuxDefaultInterface):
 
     def actions(self, action_dict) -> list:
         return []
-    
+
+
 # (2) Register environment --------------------------------------------------
 from ray.tune.registry import register_env
 from lux_env import LuxEnv
 
 
 def env_creator(env_config):
-    
     configuration = env_config.get(configuration, {})
     debug = env_config.get(debug, False)
     interface = env_config.get(interface, MyInterface)
     agents = env_config.get(agents, (None, "simple_agent"))
-    
+
     return LuxEnv(configuration, debug,
-                     interface=interface,
-                     agents=agents,
-                     train=True)
+                  interface=interface,
+                  agents=agents,
+                  train=True)
+
 
 register_env("multilux", env_creator)
 
@@ -75,20 +69,15 @@ config = {
         },
         "policy_mapping_fn":
             lambda agent_id:
-                "citytile"  # Citytiles always have the same policy
-                if agent_id.startswith("u_")
-                else random.choice(["unit-1", "unit-2"])  # Randomly choose from unit policies
+            "citytile"  # Citytiles always have the same policy
+            if agent_id.startswith("u_")
+            else random.choice(["unit-1", "unit-2"])  # Randomly choose from unit policies
     },
 }
 
+# ray.init()
 trainer = ppo.PPOTrainer(env=LuxEnv, config=config)
 
 # (5) Train away -------------------------------------------------------------
 while True:
     print(trainer.train())
-```
-
----
-See also the [LuxPythonEnvGym](https://github.com/glmcdona/LuxPythonEnvGym) `OpenAI-gym` port by @glmcdona.
-
-[Jaime Ruiz Serra](https://www.kaggle.com/ruizserra)
