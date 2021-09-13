@@ -9,15 +9,14 @@ For [Lux AI Season 1](https://www.kaggle.com/c/lux-ai-2021) Kaggle competition.
 
 ## TLDR
 ```python
-from ray.tune.registry import register_env
-from lux_env import LuxEnv
+import numpy as np
 
 # (1) Define your custom interface for (obs, reward, done, info, actions) ---
 from lux_interface import LuxDefaultInterface
 
 class MyInterface(LuxDefaultInterface):
     def observation(self, joint_obs, actors) -> dict:
-        return {a: [0] for a in actors}
+        return {a: np.array([0, 0]) for a in actors}
 
     def reward(self, joint_reward, actors) -> dict:
         return {a: 0 for a in actors}
@@ -30,24 +29,40 @@ class MyInterface(LuxDefaultInterface):
 
     def actions(self, action_dict) -> list:
         return []
+    
+# (2) Register environment --------------------------------------------------
+from ray.tune.registry import register_env
+from lux_env import LuxEnv
 
-f = lambda x: LuxEnv(configuration, debug,
-                     interface=MyInterface,
-                     agents=(None, "simple_agent"),
+
+def env_creator(env_config):
+    
+    configuration = env_config.get(configuration, {})
+    debug = env_config.get(debug, False)
+    interface = env_config.get(interface, MyInterface)
+    agents = env_config.get(agents, (None, "simple_agent"))
+    
+    return LuxEnv(configuration, debug,
+                     interface=interface,
+                     agents=agents,
                      train=True)
-register_env("lux-env", f)
 
-# (2) Define observation and action spaces for each actor type --------------
-u_obs_space = [] # TODO: gym.space
-u_act_space = []
-ct_obs_space = []
-ct_act_space = []
+register_env("multilux", env_creator)
 
-# (3) Instantiate agent ------------------------------------------------------
+# (3) Define observation and action spaces for each actor type --------------
+from gym import spaces
+
+u_obs_space = spaces.Box(low=0, high=1, shape=(2,), dtype=np.float16)
+u_act_space = spaces.Discrete(2)
+ct_obs_space = spaces.Box(low=0, high=1, shape=(2,), dtype=np.float16)
+ct_act_space = spaces.Discrete(2)
+
+# (4) Instantiate agent ------------------------------------------------------
 import random
-from ray.rllib.agents.ppo import ppo
+from ray.rllib.agents import ppo
 
 config = {
+    "env_config": {},
     "multiagent": {
         "policies": {
             # the first tuple value is None -> uses default policy
@@ -63,10 +78,10 @@ config = {
     },
 }
 
-trainer = ppo.PPOTrainer(env="lux-env", config=config)
+# ray.init()
+trainer = ppo.PPOTrainer(env=LuxEnv, config=config)
 
-
-# (4) Train away -------------------------------------------------------------
+# (5) Train away -------------------------------------------------------------
 while True:
     print(trainer.train())
 ```

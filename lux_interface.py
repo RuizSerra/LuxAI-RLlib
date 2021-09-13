@@ -39,7 +39,7 @@ class LuxDefaultInterface:
         return tuple(output_data)
 
     def observation(self, joint_obs, actors) -> dict:
-        return {a: [0] for a in actors}
+        return {a: np.array([0, 0]) for a in actors}
 
     def reward(self, joint_reward, actors) -> dict:
         return {a: 0 for a in actors}
