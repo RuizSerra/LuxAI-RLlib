@@ -73,99 +73,71 @@ class LuxEnv(MultiAgentEnv):
             "car_0": 1, "car_1": 0, "traffic_light_1": 2,
         }
 
-
         :return:
         """
         obs, reward, done, info = self.env.step(action_dict)
-
         self.game.update(obs)
-
         obs, reward, done, info = self.__shape_data(obs, reward, done, info)
-
         return obs, reward, done, info
 
-    def __shape_data(self, obs, reward, done, info,
-                     funcs: Iterator[Optional[Callable]] = (None, None, None, None)) -> Tuple[dict]:
-        keys = self.game.get_team_actors(teams=(self.game.player_id,))
+    def __shape_data(self, obs, reward, done, info) -> Tuple[dict]:
+
+        funcs = [self.__shape_observation,
+                 self.__shape_reward,
+                 self.__shape_dones,
+                 self.__shape_info]  # FIXME: use factory pattern or whatever
+
+        actors = self.game.get_team_actors(teams=(self.game.player_id,))
 
         output_data = []
-        for i, d in enumerate([obs, reward, done, info]):
-            fun = funcs[i]
-            if fun:
-                d = fun(d, keys)
-            else:
-                # d = self.__shape_observation(obs, keys)
-                # TODO: perform default observation shaping
-                raise NotImplementedError
-
-            # TODO: stubbed for now
-            output_data.append({k: [] for k in keys})
+        for fun, data in zip(funcs, [obs, reward, done, info]):
+            data = fun(data, actors)
+            output_data.append({k: [] for k in actors})  # TODO: stubbed for now
 
         return tuple(output_data)
 
-    def __shape_observation(self, obs, keys, fun: Optional[Callable] = None) -> dict:
+    def __shape_observation(self, joint_obs, actors) -> dict:
         """
         Given an observation from the Lux environment,
         i.e. type(obs) == kaggle_environments.utils.Struct
         return a dict mapping actors to their individual observation.
+
+        {
+            "u_1": [0.1, 0.5],
+            "c_1_1": [0.3, 0.1],
+        }
         """
+        # return {a: f(joint_obs, a) for a in actors}
+        raise NotImplementedError
 
-        if fun:
-            obs = fun(obs, keys)
-        else:
-            # TODO: perform default observation shaping
-            raise NotImplementedError
 
-        return {k: [] for k in keys}
-
-    def __shape_reward(self, reward, keys, fun: Optional[Callable] = None) -> dict:
-        """{
-            "car_0": 3,
-            "car_1": -1,
-            "traffic_light_1": 0,
-        }"""
-
-        if fun:
-            reward = fun(reward, keys)
-        else:
-            # TODO: perform default observation shaping
-            raise NotImplementedError
-
-        return {k: [] for k in keys}
-
-    def __shape_dones(self, dones, keys, fun: Optional[Callable] = None) -> dict:
+    def __shape_reward(self, joint_reward, actors) -> dict:
         """
         {
-            "car_0": False,    # car_0 is still running
-            "car_1": True,     # car_1 is done
+            "u_1": 3,
+            "c_1_1": -1,
+        }
+        """
+        # return {a: f(joint_reward, a) for a in actors}
+        raise NotImplementedError
+
+    def __shape_dones(self, joint_done, actors) -> dict:
+        """
+        {
+            "u_1": False,    # car_0 is still running
+            "c_1_1": True,     # car_1 is done
             "__all__": False,  # the env is not done
         }
-        :param dones:
-        :return:
         """
-        if fun:
-            dones = fun(dones, keys)
-        else:
-            # TODO: perform default observation shaping
-            raise NotImplementedError
+        # return {a: f(joint_done, a) for a in actors}
+        raise NotImplementedError
 
-        return {k: [] for k in keys}
-
-    def __shape_info(self, info, keys, fun: Optional[Callable] = None) -> dict:
+    def __shape_info(self, joint_info, actors) -> dict:
         """
         {
-            "car_0": {},  # info for car_0
-            "car_1": {},  # info for car_1
+            "u_1": {},  # info for car_0
+            "c_1_1": {},  # info for car_1
         }
-        :param info:
-        :return:
         """
-        if fun:
-            info = fun(info, keys)
-        else:
-            # TODO: perform default observation shaping
-            raise NotImplementedError
-
-        return {k: [] for k in keys}
-
-
+        # return {a: f(joint_info, a) for a in actors}
+        raise NotImplementedError
