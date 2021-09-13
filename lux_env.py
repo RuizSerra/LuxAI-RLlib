@@ -16,16 +16,12 @@ from ray.rllib.utils.typing import MultiAgentDict, PolicyID, AgentID
 
 import sys
 
-logger = logging.getLogger(__name__)
-
-"""
-https://medium.com/@vermashresth/craft-and-solve-multi-agent-problems-using-rllib-and-tensorforce-a3bd1bb6f556
-"""
+# logger = logging.getLogger(__name__)
 
 from lux.game import Game
 from kaggle_environments import make
+# TODO: proper installation/import stuff
 sys.path.append('/Users/jaime/Documents/MachineLearning/LuxAI/LuxAI-agents/')
-
 
 class LuxGame:
 
