@@ -45,7 +45,9 @@ class LuxDefaultInterface:
         return {a: 0 for a in actors}
 
     def done(self, joint_done, actors) -> dict:
-        return {a: True for a in actors}
+        d = {a: True for a in actors}
+        d['__all__'] = True  # turn completion
+        return d
 
     def info(self, joint_info, actors) -> dict:
         return {a: {} for a in actors}
