@@ -4,38 +4,15 @@ Lux AI environment interface for RL-lib Multi-Agents
 Authors:  Jaime Ruiz Serra (@RuizSerra)
 Date:     Sep 2021
 """
-from gym.spaces import Box, MultiDiscrete, Tuple as TupleSpace
 import logging
-import numpy as np
-import random
-import time
 from typing import Callable, Optional, Tuple
 
 from ray.rllib.env.multi_agent_env import MultiAgentEnv
 from ray.rllib.utils.typing import MultiAgentDict, PolicyID, AgentID
 
-import sys
+from kaggle_environments import make
 
 # logger = logging.getLogger(__name__)
-
-from lux.game import Game
-from kaggle_environments import make
-# TODO: proper installation/import stuff
-sys.path.append('/Users/jaime/Documents/MachineLearning/LuxAI/LuxAI-agents/')
-
-class LuxGame:
-
-    def __init__(self, observation: dict):
-        if observation["step"] == 0:
-            self.game_state = Game()
-            self.game_state._initialize(observation["updates"])
-            self.game_state.id = observation.player
-
-    def update(self, observation: dict):
-        if observation["step"] == 0:
-            self.game_state._update(observation["updates"][2:])
-        else:
-            self.game_state._update(observation["updates"][2:])
 
 
 class LuxEnv(MultiAgentEnv):
@@ -45,7 +22,10 @@ class LuxEnv(MultiAgentEnv):
     Here we use "actor" to refer to worker, cart, or citytile, to make
     the distinction with "agent", which is the overall team/player.
 
-    docs: https://docs.ray.io/en/stable/rllib-package-ref.html#ray.rllib.env.MultiAgentEnv
+    The data flow is, at a high level:
+        [self.env -> self.game -> self.shape_stuff]---(obs, rew)---> [agent]---(action)---> *repeat*
+
+    RLlib docs: https://docs.ray.io/en/stable/rllib-package-ref.html#ray.rllib.env.MultiAgentEnv
     """
     def __init__(self, configuration, debug, game_state: Game, train=False):
         super().__init__()
