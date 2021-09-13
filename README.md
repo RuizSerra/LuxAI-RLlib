@@ -12,14 +12,30 @@ For [Lux AI Season 1](https://www.kaggle.com/c/lux-ai-2021) Kaggle competition.
 from ray.tune.registry import register_env
 from lux_env import LuxEnv
 
-# (1) Define your environment's interface for obs, reward, done, info -------
-class MyEnv(LuxEnv):
-    def __shape_observation(self, joint_obs, actors) -> dict:
-        f = lambda o,a: [o_]  # convert joint_obs to individual_obs
-        return {a: f(joint_obs, a) for a in actors}
-    # (...) just need to define a couple more custom methods
+# (1) Define your custom interface for (obs, reward, done, info, actions) ---
+from lux_interface import LuxDefaultInterface
 
-register_env("lux-env", lambda x: MyEnv())
+class MyInterface(LuxDefaultInterface):
+    def observation(self, joint_obs, actors) -> dict:
+        return {a: [0] for a in actors}
+
+    def reward(self, joint_reward, actors) -> dict:
+        return {a: 0 for a in actors}
+
+    def done(self, joint_done, actors) -> dict:
+        return {a: True for a in actors}
+
+    def info(self, joint_info, actors) -> dict:
+        return {a: {} for a in actors}
+
+    def actions(self, action_dict) -> list:
+        return []
+
+f = lambda x: LuxEnv(configuration, debug,
+                     interface=MyInterface,
+                     agents=(None, "simple_agent"),
+                     train=True)
+register_env("lux-env", f)
 
 # (2) Define observation and action spaces for each actor type --------------
 u_obs_space = [] # TODO: gym.space

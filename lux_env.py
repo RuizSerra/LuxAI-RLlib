@@ -13,6 +13,7 @@ from ray.rllib.utils.typing import MultiAgentDict, PolicyID, AgentID
 from kaggle_environments import make
 
 from lux_game import LuxGame
+from lux_interface import LuxDefaultInterface
 
 # logger = logging.getLogger(__name__)
 
@@ -24,12 +25,25 @@ class LuxEnv(MultiAgentEnv):
     Here we use "actor" to refer to worker, cart, or citytile, to make
     the distinction with "agent", which is the overall team/player.
 
+    All that you need to customise for your own ML engineering is the interface.
+    See lux_interface.LuxDefaultInterface() for reference.
+
     The data flow is, at a high level:
         [self.env -> self.game -> self.shape_stuff]---(obs, rew)---> [agent]---(action)---> *repeat*
 
     RLlib docs: https://docs.ray.io/en/stable/rllib-package-ref.html#ray.rllib.env.MultiAgentEnv
+
+    :param configuration: (Dict) the config dict for the LuxAI Kaggle environment
+    :param debug: (Bool)
+    :param interface: (LuxDefaultInterface) Defines how joint observations are
+                       converted to per-actor observations, and such.
+    :param agents: (Iterable) The two agents to run in the environment. Set the one training to None.
+    :param train: (Bool)  Not sure, I think it needs to always be True?
     """
-    def __init__(self, configuration, debug, agents=(None, "simple_agent"), train=True):
+    def __init__(self, configuration, debug,
+                 interface=LuxDefaultInterface,
+                 agents=(None, "simple_agent"),
+                 train=True):
         super().__init__()
 
         self.env = make("lux_ai_2021",
@@ -37,10 +51,11 @@ class LuxEnv(MultiAgentEnv):
         if train:  # ???
             self.env = self.env.train(agents)
 
+        self.game = None  # will be set to LuxGame(obs) in self.reset()
+        self.interface = interface(self.game)
+
         self.action_space = None
         self.observation_space = None
-
-        self.game = None  # will be set to LuxGame(obs) in self.reset()
 
     def reset(self):
         """
@@ -51,8 +66,8 @@ class LuxEnv(MultiAgentEnv):
         self.game = LuxGame(obs)
         self.game.update(obs)
 
-        keys = self.game.get_team_actors(teams=(self.game.player_id,))
-        obs = self.__shape_observation(obs, keys)
+        actors = self.game.get_team_actors(teams=(self.game.player_id,))
+        obs = self.interface.observation(obs, actors)
 
         return obs
 
@@ -70,74 +85,19 @@ class LuxEnv(MultiAgentEnv):
         :param action_dict:
 
         action_dict={
-            "car_0": 1, "car_1": 0, "traffic_light_1": 2,
+            "u_1": 1, "c_1_1": 0,
         }
 
-        :return:
         """
-        obs, reward, done, info = self.env.step(action_dict)
+        # Convert actions dict to list of actions as per LuxAI spec
+        actions = self.interface.actions(action_dict)
+        # Apply actions to environment
+        obs, reward, done, info = self.env.step(actions)
+        # Update game state
         self.game.update(obs)
-        obs, reward, done, info = self.__shape_data(obs, reward, done, info)
+        # Get actors for this team
+        actors = self.game.get_team_actors(teams=(self.game.player_id,), flat=True)
+        # Convert data to dicts as per RLlib spec
+        obs, reward, done, info = self.interface.ordi(obs, reward, done, info, actors)
+
         return obs, reward, done, info
-
-    def __shape_data(self, obs, reward, done, info) -> Tuple[dict]:
-
-        funcs = [self.__shape_observation,
-                 self.__shape_reward,
-                 self.__shape_dones,
-                 self.__shape_info]  # FIXME: use factory pattern or whatever
-
-        actors = self.game.get_team_actors(teams=(self.game.player_id,))
-
-        output_data = []
-        for fun, data in zip(funcs, [obs, reward, done, info]):
-            data = fun(data, actors)
-            output_data.append({k: [] for k in actors})  # TODO: stubbed for now
-
-        return tuple(output_data)
-
-    def __shape_observation(self, joint_obs, actors) -> dict:
-        """
-        Given an observation from the Lux environment,
-        i.e. type(obs) == kaggle_environments.utils.Struct
-        return a dict mapping actors to their individual observation.
-
-        {
-            "u_1": [0.1, 0.5],
-            "c_1_1": [0.3, 0.1],
-        }
-        """
-        # return {a: f(joint_obs, a) for a in actors}
-        raise NotImplementedError
-
-
-    def __shape_reward(self, joint_reward, actors) -> dict:
-        """
-        {
-            "u_1": 3,
-            "c_1_1": -1,
-        }
-        """
-        # return {a: f(joint_reward, a) for a in actors}
-        raise NotImplementedError
-
-    def __shape_dones(self, joint_done, actors) -> dict:
-        """
-        {
-            "u_1": False,    # car_0 is still running
-            "c_1_1": True,     # car_1 is done
-            "__all__": False,  # the env is not done
-        }
-        """
-        # return {a: f(joint_done, a) for a in actors}
-        raise NotImplementedError
-
-    def __shape_info(self, joint_info, actors) -> dict:
-        """
-        {
-            "u_1": {},  # info for car_0
-            "c_1_1": {},  # info for car_1
-        }
-        """
-        # return {a: f(joint_info, a) for a in actors}
-        raise NotImplementedError
