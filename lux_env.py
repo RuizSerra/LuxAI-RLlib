@@ -12,6 +12,8 @@ from ray.rllib.utils.typing import MultiAgentDict, PolicyID, AgentID
 
 from kaggle_environments import make
 
+from lux_game import LuxGame
+
 # logger = logging.getLogger(__name__)
 
 
@@ -27,7 +29,7 @@ class LuxEnv(MultiAgentEnv):
 
     RLlib docs: https://docs.ray.io/en/stable/rllib-package-ref.html#ray.rllib.env.MultiAgentEnv
     """
-    def __init__(self, configuration, debug, game_state: Game, train=False):
+    def __init__(self, configuration, debug, agents=(None, "simple_agent"), train=True):
         super().__init__()
 
         self.env = make("lux_ai_2021",
@@ -49,7 +51,8 @@ class LuxEnv(MultiAgentEnv):
         self.game = LuxGame(obs)
         self.game.update(obs)
 
-        obs = self.__shape_observation(obs)
+        keys = self.game.get_team_actors(teams=(self.game.player_id,))
+        obs = self.__shape_observation(obs, keys)
 
         return obs
 
@@ -82,10 +85,10 @@ class LuxEnv(MultiAgentEnv):
         return obs, reward, done, info
 
     def __shape_data(self, obs, reward, done, info,
-                     funcs: Iterator[Union[Optional, Callable]] = (None, None, None, None)) -> Tuple[dict]:
+                     funcs: Iterator[Optional[Callable]] = (None, None, None, None)) -> Tuple[dict]:
         keys = self.game.get_team_actors(teams=(self.game.player_id,))
 
-        return_dicts = []
+        output_data = []
         for i, d in enumerate([obs, reward, done, info]):
             fun = funcs[i]
             if fun:
@@ -96,9 +99,9 @@ class LuxEnv(MultiAgentEnv):
                 raise NotImplementedError
 
             # TODO: stubbed for now
-            return_dicts.append({k: [] for k in keys})
+            output_data.append({k: [] for k in keys})
 
-        return tuple(return_dicts)
+        return tuple(output_data)
 
     def __shape_observation(self, obs, keys, fun: Optional[Callable] = None) -> dict:
         """

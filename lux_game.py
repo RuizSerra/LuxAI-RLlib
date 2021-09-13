@@ -30,7 +30,7 @@ class LuxGame:
         self.units = []
         self.citytiles = []
         self.cities = []
-        for player in game_state.players:
+        for player in [p for p in self.game_state.players if p.team in teams]:
             for unit in player.units:
                 self.units.append(unit)
             for city in player.cities.values():
