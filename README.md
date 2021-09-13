@@ -9,13 +9,10 @@ For [Lux AI Season 1](https://www.kaggle.com/c/lux-ai-2021) Kaggle competition.
 
 ## TLDR
 ```python
-import random
-
 from ray.tune.registry import register_env
-from ray.rllib.agents import ppo
-
 from lux_env import LuxEnv
 
+# (1) Define your environment's interface for obs, reward, done, info -------
 class MyEnv(LuxEnv):
     def __shape_observation(self, joint_obs, actors) -> dict:
         f = lambda o,a: [o_]  # convert joint_obs to individual_obs
@@ -24,11 +21,15 @@ class MyEnv(LuxEnv):
 
 register_env("lux-env", lambda x: MyEnv())
 
-# TODO: define observation and action spaces for each actor type
-u_obs_space = [] # gym.space
+# (2) Define observation and action spaces for each actor type --------------
+u_obs_space = [] # TODO: gym.space
 u_act_space = []
 ct_obs_space = []
 ct_act_space = []
+
+# (3) Instantiate agent ------------------------------------------------------
+import random
+from ray.rllib.agents import ppo
 
 config = {
     "multiagent": {
@@ -48,6 +49,8 @@ config = {
 
 trainer = ppo.PPOAgent(env="lux-env", config=config)
 
+
+# (4) Train away -------------------------------------------------------------
 while True:
     print(trainer.train())
 ```
