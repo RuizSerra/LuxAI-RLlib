@@ -29,7 +29,7 @@ ct_act_space = []
 
 # (3) Instantiate agent ------------------------------------------------------
 import random
-from ray.rllib.agents import ppo
+from ray.rllib.agents.ppo import ppo
 
 config = {
     "multiagent": {
@@ -47,7 +47,7 @@ config = {
     },
 }
 
-trainer = ppo.PPOAgent(env="lux-env", config=config)
+trainer = ppo.PPOTrainer(env="lux-env", config=config)
 
 
 # (4) Train away -------------------------------------------------------------
