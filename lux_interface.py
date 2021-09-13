@@ -7,6 +7,8 @@ inherits from this one and pass it to LuxEnv when instantiating it.
 Author: Jaime Ruiz Serra (@RuizSerra)
 Date:   September 2021
 """
+
+from typing import Callable, Iterator, Union, Optional, List, Tuple
 import numpy as np
 
 
