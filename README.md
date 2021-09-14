@@ -9,6 +9,8 @@ For [Lux AI Season 1](https://www.kaggle.com/c/lux-ai-2021) Kaggle competition.
 
 ## TLDR
 
+![Diagram](img/img.png)
+
 See [`examples/training.py`](examples/training.py)
 
 ```python
