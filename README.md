@@ -12,7 +12,7 @@ Please let me know if you use this, I'd like to see what people build with it!
 ## TL;DR
 
 The only thing you need to customise is the interface class (inheriting from 
-`lux_interface.LuxDefaultInterface`). The interface needs to:
+`multilux.lux_interface.LuxDefaultInterface`). The interface needs to:
 * Implement four "toward-agent" methods:
     - `observation(joint_observation, actors)`
     - `reward(joint_reward, actors)`
@@ -33,7 +33,7 @@ The only thing you need to customise is the interface class (inheriting from
 import numpy as np
 
 # (1) Define your custom interface for (obs, reward, done, info, actions) ---
-from lux_interface import LuxDefaultInterface
+from multilux.lux_interface import LuxDefaultInterface
 
 class MyInterface(LuxDefaultInterface):
     def observation(self, joint_obs, actors) -> dict:
@@ -53,7 +53,7 @@ class MyInterface(LuxDefaultInterface):
     
 # (2) Register environment --------------------------------------------------
 from ray.tune.registry import register_env
-from lux_env import LuxEnv
+from multilux.lux_env import LuxEnv
 
 
 def env_creator(env_config):

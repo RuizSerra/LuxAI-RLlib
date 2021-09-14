@@ -12,8 +12,8 @@ from ray.rllib.utils.typing import MultiAgentDict, PolicyID, AgentID
 
 from kaggle_environments import make
 
-from lux_game import LuxGame
-from lux_interface import LuxDefaultInterface
+from multilux.lux_game import LuxGame
+from multilux.lux_interface import LuxDefaultInterface
 
 # logger = logging.getLogger(__name__)
 
