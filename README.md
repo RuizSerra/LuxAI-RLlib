@@ -3,15 +3,31 @@
 
 For [Lux AI Season 1](https://www.kaggle.com/c/lux-ai-2021) Kaggle competition.
 
-* [LuxAI](https://github.com/Lux-AI-Challenge/Lux-Design-2021)
-* [RLlib-multiagents](https://docs.ray.io/en/stable/rllib-package-ref.html#ray.rllib.env.MultiAgentEnv)  
-* [Kaggle environments](https://github.com/Kaggle/kaggle-environments#training)  
+* [LuxAI repo](https://github.com/Lux-AI-Challenge/Lux-Design-2021)
+* [RLlib-multiagents docs](https://docs.ray.io/en/stable/rllib-package-ref.html#ray.rllib.env.MultiAgentEnv)  
+* [Kaggle environments repo](https://github.com/Kaggle/kaggle-environments#training)
 
-## TLDR
+Please let me know if you use this, I'd like to see what people build with it!
+
+## TL;DR
+
+The only thing you need to customise is the interface class (inheriting from 
+`lux_interface.LuxDefaultInterface`). The interface needs to:
+* Implement four "toward-agent" methods:
+    - `observation(joint_observation, actors)`
+    - `reward(joint_reward, actors)`
+    - `done(joint_done, actors)`
+    - `info(joint_info, actors)`
+* Implement one "toward-environment" method:    
+    - `actions(action_dict)`
+* Manage its own `actor id` creation, assignment, etc. 
+  (hint citytiles don't have ids in the game engine)
+
+### Implementation diagram
 
 ![Diagram](img/img.png)
 
-See [`examples/training.py`](examples/training.py)
+### Example for training
 
 ```python
 import numpy as np
@@ -89,6 +105,8 @@ trainer = ppo.PPOTrainer(env=LuxEnv, config=config)
 while True:
     print(trainer.train())
 ```
+
+See [`examples/training.py`](examples/training.py)
 
 ---
 See also the [LuxPythonEnvGym](https://github.com/glmcdona/LuxPythonEnvGym) `OpenAI-gym` port by @glmcdona.
