@@ -9,13 +9,12 @@ Date:   September 2021
 """
 
 from typing import Callable, Iterator, Union, Optional, List, Tuple
+from gym import spaces
 import numpy as np
 
 
 class LuxDefaultInterface:
-
     """
-
     Note: any operations with self.game should be read only ideally
     """
 

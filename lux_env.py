@@ -52,7 +52,7 @@ class LuxEnv(MultiAgentEnv):
             self.env = self.env.train(agents)
 
         self.game = None  # will be set to LuxGame(obs) in self.reset()
-        self.interface = interface(self.game)
+        self.interface = interface  # will be instantiated in self.reset()
 
         self.action_space = None
         self.observation_space = None
@@ -63,12 +63,15 @@ class LuxEnv(MultiAgentEnv):
         """
         obs = self.env.reset()
 
+        # Instantiate game wrapper
         self.game = LuxGame(obs)
         self.game.update(obs)
-
+        # Instantiate interface to agent
+        self.interface = self.interface(self.game)
+        # Get actor objects for current player from game
         actors = self.game.get_team_actors(teams=(self.game.player_id,))
+        # Get observation
         obs = self.interface.observation(obs, actors)
-
         return obs
 
     def step(self, action_dict):

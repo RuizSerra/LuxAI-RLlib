@@ -24,6 +24,9 @@ class LuxGame:
         else:
             self.game_state._update(observation["updates"])
 
+    def get_state(self):
+        return self.game_state
+
     def get_team_actors(self, teams=(0,), flat=False):
         self.units = []
         self.citytiles = []
