@@ -38,6 +38,7 @@ class LuxGame:
                 self.units.append(unit)
             for city in player.cities.values():
                 for citytile in city.citytiles:
+                    citytile.id = f'ct_{citytile.pos.x}_{citytile.pos.y}'
                     self.citytiles.append(citytile)
                 self.cities.append(city)
 
