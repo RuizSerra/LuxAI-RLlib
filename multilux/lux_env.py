@@ -71,7 +71,7 @@ class LuxEnv(MultiAgentEnv):
         # Get actor objects for current player from game
         actors = self.game.get_team_actors(teams=(self.game.player_id,))
         # Get observation
-        obs = self.interface.observation(obs, actors)
+        obs = self.interface.observation(obs, actors, self.game.get_state())
         return obs
 
     def step(self, action_dict):
@@ -101,6 +101,7 @@ class LuxEnv(MultiAgentEnv):
         # Get actors for this team
         actors = self.game.get_team_actors(teams=(self.game.player_id,), flat=True)
         # Convert data to dicts as per RLlib spec
-        obs, reward, done, info = self.interface.ordi(obs, reward, done, info, actors)
+        obs, reward, done, info = self.interface.ordi(obs, reward, done, info,
+                                                      actors, self.game.get_state())
 
         return obs, reward, done, info

@@ -14,12 +14,10 @@ import numpy as np
 
 
 class LuxDefaultInterface:
-    """
-    Note: any operations with self.game should be read only ideally
-    """
 
-    def __init__(self, game):
-        self.game = game
+    obs_spaces = {'default': spaces.Box(low=0, high=1,
+                                                 shape=(2,), dtype=np.float16)}
+    act_spaces = {'default': spaces.Discrete(2)}
 
     def ordi(self, *args) -> Tuple[dict]:
         funcs = [self.observation,
@@ -28,29 +26,34 @@ class LuxDefaultInterface:
                  self.info]
 
         actors = args.pop()
+        game_state = args.pop()
 
         joint_data = args
         output_data = []
         for fun, data in zip(funcs, joint_data):
-            data = fun(data, actors)
+            data = fun(data, actors, game_state)
             output_data.append(data)
 
         return tuple(output_data)
 
-    def observation(self, joint_obs, actors) -> dict:
-        return {a: np.array([0, 0]) for a in actors}
+    def observation(self, joint_obs, actors, game_state) -> dict:
+        return {a: self.obs_spaces['default'].sample() for a in actors}
 
-    def reward(self, joint_reward, actors) -> dict:
+    def reward(self, joint_reward, actors, game_state) -> dict:
         return {a: 0 for a in actors}
 
-    def done(self, joint_done, actors) -> dict:
+    def done(self, joint_done, actors, game_state) -> dict:
         d = {a: True for a in actors}
         d['__all__'] = True  # turn completion
         return d
 
-    def info(self, joint_info, actors) -> dict:
+    def info(self, joint_info, actors, game_state) -> dict:
         return {a: {} for a in actors}
 
     def actions(self, action_dict) -> list:
+        """
+        Takes an RLlib multi-agent style dict.
+        Returns a list of LuxAI actions
+        """
         return []
 
