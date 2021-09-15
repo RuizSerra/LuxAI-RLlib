@@ -72,10 +72,10 @@ from multilux.lux_env import LuxEnv
 
 def env_creator(env_config):
     
-    configuration = env_config.get(configuration, {})
-    debug = env_config.get(debug, False)
-    interface = env_config.get(interface, MyInterface)
-    agents = env_config.get(agents, (None, "simple_agent"))
+    configuration = env_config.get('configuration', {})
+    debug = env_config.get('debug', False)
+    interface = env_config.get('interface', MyInterface)
+    agents = env_config.get('agents', (None, "simple_agent"))
     
     return LuxEnv(configuration, debug,
                   interface=interface,
@@ -114,7 +114,7 @@ config = {
     },
 }
 
-trainer = ppo.PPOTrainer(env=LuxEnv, config=config)
+trainer = ppo.PPOTrainer(env="multilux", config=config)
 
 # (4) Train away -------------------------------------------------------------
 while True:
