@@ -41,14 +41,13 @@ class LuxEnv(MultiAgentEnv):
     """
     def __init__(self, configuration, debug=False,
                  interface=LuxDefaultInterface,
-                 agents=(None, "simple_agent"),
-                 train=True):
+                 agents=(None, "simple_agent")):
         super().__init__()
 
-        self.env = make("lux_ai_2021",
-                        configuration=configuration, debug=debug)
-        if train:  # ???
-            self.env = self.env.train(agents)
+        self._env = make("lux_ai_2021",
+                         configuration=configuration, debug=debug)
+
+        self.env = self._env.train(agents)
 
         self.interface = interface  # will be instantiated in self.reset()
 
