@@ -39,7 +39,7 @@ class LuxEnv(MultiAgentEnv):
     :param agents: (Iterable) The two agents to run in the environment. Set the one training to None.
     :param train: (Bool)  Not sure, I think it needs to always be True?
     """
-    def __init__(self, configuration, debug,
+    def __init__(self, configuration, debug=False,
                  interface=LuxDefaultInterface,
                  agents=(None, "simple_agent"),
                  train=True):

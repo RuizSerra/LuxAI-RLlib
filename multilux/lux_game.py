@@ -35,9 +35,11 @@ class LuxGame:
         self.cities = []
         for player in [p for p in self.game_state.players if p.team in teams]:
             for unit in player.units:
+                unit.class_name = 'unit'
                 self.units.append(unit)
             for city in player.cities.values():
                 for citytile in city.citytiles:
+                    citytile.class_name = 'citytile'
                     citytile.id = f'ct_{citytile.pos.x}_{citytile.pos.y}'
                     self.citytiles.append(citytile)
                 self.cities.append(city)

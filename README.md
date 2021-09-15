@@ -94,12 +94,12 @@ config = {
         "policies": {
             # the first tuple value is None -> uses default policy
             "unit-1": (None, 
-                       MyInterface.obs_spaces["unit-1"], 
-                       MyInterface.act_spaces["unit-1"], 
+                       MyInterface.obs_spaces["unit"], 
+                       MyInterface.act_spaces["unit"], 
                        {"gamma": 0.85}),
             "unit-2": (None, 
-                       MyInterface.obs_spaces["unit-2"], 
-                       MyInterface.act_spaces["unit-2"], 
+                       MyInterface.obs_spaces["unit"], 
+                       MyInterface.act_spaces["unit"], 
                        {"gamma": 0.99}),
             "citytile": (None, 
                          MyInterface.obs_spaces["citytile"], 
