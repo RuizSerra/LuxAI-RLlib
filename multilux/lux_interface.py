@@ -12,6 +12,8 @@ from typing import Callable, Iterator, Union, Optional, List, Tuple
 from gym import spaces
 import numpy as np
 
+from multilux.lux_game import LuxGame
+
 
 class LuxDefaultInterface:
 
@@ -19,35 +21,51 @@ class LuxDefaultInterface:
                                                  shape=(2,), dtype=np.float16)}
     act_spaces = {'default': spaces.Discrete(2)}
 
-    def ordi(self, *args) -> Tuple[dict]:
+    def __init__(self, obs):
+        # Instantiate game wrapper
+        self.game = LuxGame(obs)
+        self.game_state = self.game.update(obs)
+
+    def ordi(self, *joint_data) -> Tuple[dict]:
+        """Coordinates the conversion of each of the data types
+
+        :param joint_data: (obs, reward, done, info) as LuxAI (kaggle env) format
+        :return: (obs, reward, done, info) as dicts for RLlib trainer
+        """
+
         funcs = [self.observation,
                  self.reward,
                  self.done,
                  self.info]
 
-        actors = args.pop()
-        game_state = args.pop()
+        # Update game state form env observation
+        self.game_state = self.game.update(joint_data[0])
+        # Get actor objects for current player from game
+        actors = self.game.get_team_actors(teams=(self.game.player_id,), flat=True)
 
-        joint_data = args
         output_data = []
         for fun, data in zip(funcs, joint_data):
-            data = fun(data, actors, game_state)
+            data = fun(data, actors)
             output_data.append(data)
 
         return tuple(output_data)
 
-    def observation(self, joint_obs, actors, game_state) -> dict:
+    def observation(self, joint_obs, actors) -> dict:
+        # use self.game_state
         return {a: self.obs_spaces['default'].sample() for a in actors}
 
-    def reward(self, joint_reward, actors, game_state) -> dict:
+    def reward(self, joint_reward, actors) -> dict:
+        # use self.game_state
         return {a: 0 for a in actors}
 
-    def done(self, joint_done, actors, game_state) -> dict:
+    def done(self, joint_done, actors) -> dict:
+        # use self.game_state
         d = {a: True for a in actors}
         d['__all__'] = True  # turn completion
         return d
 
-    def info(self, joint_info, actors, game_state) -> dict:
+    def info(self, joint_info, actors) -> dict:
+        # use self.game_state
         return {a: {} for a in actors}
 
     def actions(self, action_dict) -> list:
@@ -55,5 +73,5 @@ class LuxDefaultInterface:
         Takes an RLlib multi-agent style dict.
         Returns a list of LuxAI actions
         """
+        # use self.game_state
         return []
-

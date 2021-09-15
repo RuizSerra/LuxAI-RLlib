@@ -12,7 +12,6 @@ from ray.rllib.utils.typing import MultiAgentDict, PolicyID, AgentID
 
 from kaggle_environments import make
 
-from multilux.lux_game import LuxGame
 from multilux.lux_interface import LuxDefaultInterface
 
 # logger = logging.getLogger(__name__)
@@ -29,7 +28,7 @@ class LuxEnv(MultiAgentEnv):
     See lux_interface.LuxDefaultInterface() for reference.
 
     The data flow is, at a high level:
-        [self.env -> self.game -> self.shape_stuff]---(obs, rew)---> [agent]---(action)---> *repeat*
+        LuxEnv[self.env] -> LuxInterface[self.game]---(obs, rew)---> [agent]---(action)---> *repeat*
 
     RLlib docs: https://docs.ray.io/en/stable/rllib-package-ref.html#ray.rllib.env.MultiAgentEnv
 
@@ -51,7 +50,6 @@ class LuxEnv(MultiAgentEnv):
         if train:  # ???
             self.env = self.env.train(agents)
 
-        self.game = None  # will be set to LuxGame(obs) in self.reset()
         self.interface = interface  # will be instantiated in self.reset()
 
         self.action_space = None
@@ -62,16 +60,9 @@ class LuxEnv(MultiAgentEnv):
         returns a dictionary of observations with keys being agent ids
         """
         obs = self.env.reset()
-
-        # Instantiate game wrapper
-        self.game = LuxGame(obs)
-        self.game.update(obs)
         # Instantiate interface to agent
-        self.interface = self.interface(self.game)
-        # Get actor objects for current player from game
-        actors = self.game.get_team_actors(teams=(self.game.player_id,))
-        # Get observation
-        obs = self.interface.observation(obs, actors, self.game.get_state())
+        self.interface = self.interface(obs)
+        obs = self.interface.observation(obs)
         return obs
 
     def step(self, action_dict):
@@ -96,12 +87,6 @@ class LuxEnv(MultiAgentEnv):
         actions = self.interface.actions(action_dict)
         # Apply actions to environment
         obs, reward, done, info = self.env.step(actions)
-        # Update game state
-        self.game.update(obs)
-        # Get actors for this team
-        actors = self.game.get_team_actors(teams=(self.game.player_id,), flat=True)
         # Convert data to dicts as per RLlib spec
-        obs, reward, done, info = self.interface.ordi(obs, reward, done, info,
-                                                      actors, self.game.get_state())
-
+        obs, reward, done, info = self.interface.ordi(obs, reward, done, info)
         return obs, reward, done, info

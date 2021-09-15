@@ -18,11 +18,13 @@ class LuxGame:
             self.game_state.id = observation.player
             self.player_id = observation.player
 
-    def update(self, observation: dict):
+    def update(self, observation: dict) -> Game:
         if observation["step"] == 0:
             self.game_state._update(observation["updates"][2:])
         else:
             self.game_state._update(observation["updates"])
+
+        return self.game_state
 
     def get_state(self):
         return self.game_state
@@ -39,7 +41,7 @@ class LuxGame:
                     self.citytiles.append(citytile)
                 self.cities.append(city)
 
-        citytiles = [c for c in self.citytiles if c.team in teams]  # TODO: citytiles need ids
+        citytiles = [c for c in self.citytiles if c.team in teams]
         units = [u for u in self.units if u.team in teams]
 
         if flat:
