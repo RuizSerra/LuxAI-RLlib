@@ -15,10 +15,10 @@ The only thing you need to customise is the interface class (inheriting from
 `multilux.lux_interface.LuxDefaultInterface`). The interface needs to:
 * Define observation and action spaces as class attributes
 * Implement four "toward-agent" methods:
-    - `observation(joint_observation, actors, game_state)`
-    - `reward(joint_reward, actors, game_state)`
-    - `done(joint_done, actors, game_state)`
-    - `info(joint_info, actors, game_state)`
+    - `observation(joint_observation, actors)`
+    - `reward(joint_reward, actors)`
+    - `done(joint_done, actors)`
+    - `info(joint_info, actors)`
 * Implement one "toward-environment" method:    
     - `actions(action_dict)`
 * Manage its own `actor id` creation, assignment, etc. 
