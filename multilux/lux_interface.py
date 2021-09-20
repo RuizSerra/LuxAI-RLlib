@@ -50,7 +50,7 @@ class LuxDefaultInterface:
 
         return tuple(output_data)
 
-    def observation(self, joint_obs, actors) -> dict:
+    def observation(self, joint_obs, actors=None) -> dict:
         # use self.game_state
         return {a.id: self.obs_spaces['default'].sample() for a in actors}
 

@@ -49,7 +49,8 @@ class LuxEnv(MultiAgentEnv):
 
         self.env = self._env.train(agents)
 
-        self.interface = interface  # will be instantiated in self.reset()
+        self.interface_class = interface
+        self.interface = None  # will be instantiated in self.reset()
 
         self.action_space = None
         self.observation_space = None
@@ -60,7 +61,7 @@ class LuxEnv(MultiAgentEnv):
         """
         obs = self.env.reset()
         # Instantiate interface to agent
-        self.interface = self.interface(obs)
+        self.interface = self.interface_class(obs)
         obs = self.interface.observation(obs)
         return obs
 
