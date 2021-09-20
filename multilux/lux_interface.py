@@ -52,21 +52,21 @@ class LuxDefaultInterface:
 
     def observation(self, joint_obs, actors) -> dict:
         # use self.game_state
-        return {a: self.obs_spaces['default'].sample() for a in actors}
+        return {a.id: self.obs_spaces['default'].sample() for a in actors}
 
     def reward(self, joint_reward, actors) -> dict:
         # use self.game_state
-        return {a: 0 for a in actors}
+        return {a.id: 0 for a in actors}
 
     def done(self, joint_done, actors) -> dict:
         # use self.game_state
-        d = {a: True for a in actors}
+        d = {a.id: True for a in actors}
         d['__all__'] = True  # turn completion
         return d
 
     def info(self, joint_info, actors) -> dict:
         # use self.game_state
-        return {a: {} for a in actors}
+        return {a.id: {} for a in actors}
 
     def actions(self, action_dict) -> list:
         """
