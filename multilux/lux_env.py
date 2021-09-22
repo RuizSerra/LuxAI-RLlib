@@ -6,7 +6,7 @@ Date:     Sep 2021
 """
 import logging
 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(name)s %(levelname)s:%(message)s')
+# logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(name)s %(levelname)s:%(message)s')
 logger = logging.getLogger(__name__)
 
 from ray.rllib.env.multi_agent_env import MultiAgentEnv
@@ -43,6 +43,8 @@ class LuxEnv(MultiAgentEnv):
                  agents=(None, "simple_agent")):
         super().__init__()
 
+        logger.debug('Init LuxEnv')
+
         self._env = make("lux_ai_2021",
                          configuration=configuration, debug=debug)
 
@@ -58,7 +60,7 @@ class LuxEnv(MultiAgentEnv):
         """
         returns a dictionary of observations with keys being agent ids
         """
-        logger.info("Lux Environment reset")
+        logger.debug("Environment reset")
         obs = self.env.reset()
         # Instantiate interface to agent
         self.interface = self.interface_class(obs)
