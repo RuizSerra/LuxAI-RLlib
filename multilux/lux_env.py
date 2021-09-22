@@ -5,17 +5,15 @@ Authors:  Jaime Ruiz Serra (@RuizSerra)
 Date:     Sep 2021
 """
 import logging
-from typing import Callable, Iterator, Union, Optional, List, Tuple
+
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(name)s %(levelname)s:%(message)s')
+logger = logging.getLogger(__name__)
 
 from ray.rllib.env.multi_agent_env import MultiAgentEnv
-from ray.rllib.utils.typing import MultiAgentDict, PolicyID, AgentID
 
 from kaggle_environments import make
 
 from multilux.lux_interface import LuxDefaultInterface
-
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(name)s %(levelname)s:%(message)s')
-logger = logging.getLogger(__name__)
 
 
 class LuxEnv(MultiAgentEnv):
