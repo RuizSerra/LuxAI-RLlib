@@ -14,9 +14,6 @@ from kaggle_environments import make
 
 from multilux.lux_interface import LuxDefaultInterface
 
-logger = logging.getLogger(__name__)
-
-
 class LuxEnv(MultiAgentEnv):
     """
     A MultiAgentEnv only needs two methods: reset() and step().
@@ -59,7 +56,7 @@ class LuxEnv(MultiAgentEnv):
         """
         returns a dictionary of observations with keys being agent ids
         """
-        logger.info("Lux Environment reset")
+        logging.info("Lux Environment reset")
         obs = self.env.reset()
         # Instantiate interface to agent
         self.interface = self.interface_class(obs)
