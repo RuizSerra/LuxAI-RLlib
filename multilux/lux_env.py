@@ -14,7 +14,8 @@ from kaggle_environments import make
 
 from multilux.lux_interface import LuxDefaultInterface
 
-logger = logging.getLogger()
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(name)s %(levelname)s:%(message)s')
+logger = logging.getLogger(__name__)
 
 
 class LuxEnv(MultiAgentEnv):
