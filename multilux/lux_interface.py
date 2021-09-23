@@ -26,7 +26,7 @@ class LuxDefaultInterface:
     act_spaces = {'default': spaces.Discrete(2)}
 
     def __init__(self, obs):
-        logger.debug('Init interface')
+        # logger.debug('Init interface')
         # Instantiate game wrapper
         self.game = LuxGame(obs)
         self.game_state = self.game.update(obs)

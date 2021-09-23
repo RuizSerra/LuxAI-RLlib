@@ -60,7 +60,7 @@ class LuxEnv(MultiAgentEnv):
         """
         returns a dictionary of observations with keys being agent ids
         """
-        logger.debug("Environment reset")
+        logger.debug("==================== Environment reset ====================")
         obs = self.env.reset()
         # Instantiate interface to agent
         self.interface = self.interface_class(obs)
